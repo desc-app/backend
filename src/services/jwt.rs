@@ -1,4 +1,3 @@
-use anyhow::Error;
 use jwt_simple::prelude::*;
 
 use crate::models::user::User;
@@ -15,13 +14,13 @@ impl JwtService {
         }
     }
 
-    pub fn create_token(self, user: User) -> Result<String, Error> {
+    pub fn create_token(&self, user: Option<User>) -> anyhow::Result<String> {
         // TODO: Use user data or some shit to add some fields and stuff
         let claims = Claims::create(Duration::from_hours(2));
         self.key.authenticate(claims)
     }
 
-    pub fn verify(self, user: User, token: String) -> bool {
+    pub fn verify(self, user: Option<User>, token: String) -> bool {
         self.key
             .verify_token::<NoCustomClaims>(&token, None)
             // TODO: Verify claims with user data

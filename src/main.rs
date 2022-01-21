@@ -1,7 +1,7 @@
 mod models;
 mod services;
 
-use actix_web::{get, App, HttpServer, Responder};
+use actix_web::{get, web, App, HttpServer, Responder};
 use models::ctx::AppContext;
 use services::jwt::JwtService;
 
@@ -13,20 +13,20 @@ use services::jwt::JwtService;
 // Redis for caching & distributed locks
 
 #[get("/")]
-async fn index() -> impl Responder {
-    "Hello World!"
+async fn index(data: web::Data<AppContext>) -> impl Responder {
+    match data.jwt_service.create_token(None) {
+        Ok(res) => res,
+        Err(err) => err.to_string(),
+    }
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
-        App::new()
-            .app_data(|| {
-                let jwt_service = JwtService::new();
+        let jwt_service = JwtService::new();
+        let ctx = AppContext { jwt_service };
 
-                AppContext { jwt_service }
-            })
-            .service(index)
+        App::new().data(ctx).service(index)
     })
     .bind("127.0.0.1:8080")?
     .run()
