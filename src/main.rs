@@ -3,7 +3,7 @@ mod services;
 
 use actix_web::{get, web, App, HttpServer, Responder};
 use models::ctx::AppContext;
-use services::jwt::JwtService;
+use services::{hash::HashService, jwt::JwtService, user::UserService};
 
 // Thought out stack
 // Actix web
@@ -14,19 +14,23 @@ use services::jwt::JwtService;
 
 #[get("/")]
 async fn index(data: web::Data<AppContext>) -> impl Responder {
-    match data.jwt_service.create_token(None) {
-        Ok(res) => res,
-        Err(err) => err.to_string(),
-    }
+    let opt = data.user_service.create_user("lily".to_string(), "meow".to_string());
+    format!("{:?}", opt.unwrap())
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         let jwt_service = JwtService::new();
-        let ctx = AppContext { jwt_service };
+        let hash_service = HashService::new();
+        let user_service = UserService::new(hash_service);
 
-        App::new().data(ctx).service(index)
+        App::new()
+            .data(AppContext {
+                jwt_service,
+                user_service,
+            })
+            .service(index)
     })
     .bind("127.0.0.1:8080")?
     .run()

@@ -350,6 +350,7 @@ dependencies = [
  "anyhow",
  "argon2",
  "jwt-simple",
+ "rand_core 0.6.3",
 ]
 
 [[package]]
