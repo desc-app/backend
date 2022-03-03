@@ -1,16 +1,9 @@
 mod models;
 mod services;
 
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{get, web::{self, Data}, App, HttpServer, Responder};
 use models::ctx::AppContext;
 use services::{hash::HashService, jwt::JwtService, user::UserService};
-
-// Thought out stack
-// Actix web
-// PostgreSQL using SQLx
-// InfluxDB for metrics and whatnot
-// Redis/EQMX/RabbitMQ if we need network messaging
-// Redis for caching & distributed locks
 
 #[get("/")]
 async fn index(data: web::Data<AppContext>) -> impl Responder {
@@ -26,10 +19,10 @@ async fn main() -> std::io::Result<()> {
         let user_service = UserService::new(hash_service);
 
         App::new()
-            .data(AppContext {
+            .app_data(Data::new(AppContext {
                 jwt_service,
                 user_service,
-            })
+            }))
             .service(index)
     })
     .bind("127.0.0.1:8080")?

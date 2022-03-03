@@ -18,7 +18,7 @@ impl HashService {
     pub fn hash(&self, input: String) -> Option<String> {
         match Argon2::default().hash_password(input.as_bytes(), &self.salt) {
             Ok(it) => Some(it.to_string()),
-            Err(err) => None,
+            Err(_) => None,
         }
     }
 
