@@ -25,14 +25,17 @@ class JwtAuthenticationFilter(
             val token = request.getHeader("Authorization")?.substring(7)
                 ?: throw InvalidJwtException("Authorization header missing!")
 
-            val userId = jwtService.getUserIdFromToken(token)
-            val user = userDetailsService.loadUserById(userId)
+            if(jwtService.validateToken(token)) {
+                val userId = jwtService.getUserIdFromToken(token)
+                val user = userDetailsService.loadUserById(userId)
 
-            SecurityContextHolder.getContext().authentication =
-                UsernamePasswordAuthenticationToken(user, null, user.authorities).apply {
-                    details = WebAuthenticationDetailsSource().buildDetails(request)
-                }
-        } catch (_: Exception) {
+                SecurityContextHolder.getContext().authentication =
+                    UsernamePasswordAuthenticationToken(user, null, user.authorities).apply {
+                        details = WebAuthenticationDetailsSource().buildDetails(request)
+                    }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
         filterChain.doFilter(request, response)
