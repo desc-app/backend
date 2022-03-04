@@ -1,7 +1,6 @@
 package app.desc.backend.controllers
 
 import app.desc.backend.services.UserService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/register")
-class RegisterController @Autowired constructor(private val userService: UserService) {
+class RegisterController(private val userService: UserService) {
     @PostMapping
     fun index(@RequestBody request: RegisterRequest): ResponseEntity<RegisterResponse> {
         return userService.create(request.username, request.email, request.password).let {
